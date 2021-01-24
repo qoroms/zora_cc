@@ -58,7 +58,7 @@ const calculateRating = (totalEthIn, totalEthOut, totalBlocks) => {
 
     const avgEth = Number(
         web3.utils.fromWei(
-            String(ethInPerBlock - ethOutPerBlock)
+            String((ethInPerBlock - ethOutPerBlock).toFixed(0))
         )
     );
 
