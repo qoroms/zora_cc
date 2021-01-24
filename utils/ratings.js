@@ -1,4 +1,5 @@
 const { default: BigNumber } = require("bignumber.js");
+const e = require("express");
 const { web3 } = require("./config");
 const { getTransactions } = require("./etherscan");
 
@@ -62,21 +63,23 @@ const calculateRating = (totalEthIn, totalEthOut, totalBlocks) => {
         )
     );
 
-    if (avgEth > 2) {
+    if (avgEth > 3) {
         rating = 10;
+    } else if (avgEth > 2 && avgEth >= 3) {
+        rating = 8 + (2 * (avgEth - 2));
     } else if (avgEth > 1 && avgEth <= 2) {
-        rating = 8;
+        rating = 6 + (2 * (avgEth - 1));
     } else if (avgEth > 0 && avgEth <= 1) {
-        rating = 8
-    } else if (avgEth < 0 && avgEth > -1) {
-        rating = 4
-    } else if (avgEth < -1 && avgEth > -2) {
-        rating = 2;
-    } else if (avgEth < -1) {
+        rating = 4 + (2 * avgEth)
+    } else if (avgEth < 0 && avgEth >= -1) {
+        rating = 2 + (2 * (avgEth + 1));
+    } else if (avgEth < -1 && avgEth >= -2) {
+        rating = 0 + (2 * (avgEth + 2));
+    } else if (avgEth < -2) {
         rating = 0;
     }
 
-    return rating;
+    return rating.toFixed(2);
 };
 
 const getAccountAge = (firstTx) => {
