@@ -1,6 +1,4 @@
 const { default: BigNumber } = require("bignumber.js");
-const e = require("express");
-const { web3 } = require("./config");
 const { getTransactions } = require("./etherscan");
 
 const getAccountRating = (account) => {
@@ -37,7 +35,7 @@ const getAccountRating = (account) => {
                 const rating = calculateRating(
                     totalEthIn,
                     totalEthOut,
-                    totalBlocks,
+                    Number(totalBlocks),
                 );
 
                 resolve(rating);
@@ -49,44 +47,52 @@ const getAccountRating = (account) => {
 const calculateRating = (totalEthIn, totalEthOut, totalBlocks) => {
     let rating = 0;
 
-    const ethInPerBlock = Number(
-        totalEthIn.dividedBy(new BigNumber(totalBlocks))
-    );
+    if (totalBlocks <= 200) {
+        rating += 0;
+    } else if (totalBlocks > 200 && totalBlocks <= 1000) {
+        rating += 6 * (totalBlocks / 1000);
+    } else if (totalBlocks > 101 && totalBlocks <= 10000) {
+        rating += 6 + (6 * (totalBlocks / 10000))
+    } else if (totalBlocks > 10001 && totalBlocks <= 100000) {
+        rating += 12 + (6 * (totalBlocks / 100000))
+    } else if (totalBlocks > 100001 && totalBlocks <= 1000000) {
+        rating += 20 + (12 * (totalBlocks / 1000000))
+    } else if (totalBlocks > 1000001 && totalBlocks <= 10000000) {
+        rating += 32 + (13 * (totalBlocks / 10000000))
+    } else if (totalBlocks > 10000001 && totalBlocks <= 100000000) {
+        rating += 45 + (13 * (totalBlocks / 100000000))
+    } else if (totalBlocks > 100000001 && totalBlocks <= 1000000000) {
+        rating += 58 + (12 * (totalBlocks / 1000000000))
+    } else if (totalBlocks > 1000000000) {
+        rating += 70;
+    }
 
-    const ethOutPerBlock = Number(
-        totalEthOut.dividedBy(new BigNumber(totalBlocks))
-    );
+    const avgEth = totalEthIn.minus(totalEthOut);
+    const avgEthLength = avgEth.e + 1;
 
-    const avgEth = Number(
-        web3.utils.fromWei(
-            String((ethInPerBlock - ethOutPerBlock).toFixed(0))
+    const variableRating = Number(
+        new BigNumber(10).multipliedBy(
+            avgEth.dividedBy(
+                new BigNumber(10).pow(
+                    new BigNumber(avgEthLength)
+                )
+            )
         )
     );
 
-    if (avgEth > 3) {
-        rating = 10;
-    } else if (avgEth > 2 && avgEth >= 3) {
-        rating = 8 + (2 * (avgEth - 2));
-    } else if (avgEth > 1 && avgEth <= 2) {
-        rating = 6 + (2 * (avgEth - 1));
-    } else if (avgEth > 0 && avgEth <= 1) {
-        rating = 4 + (2 * avgEth)
-    } else if (avgEth < 0 && avgEth >= -1) {
-        rating = 2 + (2 * (avgEth + 1));
-    } else if (avgEth < -1 && avgEth >= -2) {
-        rating = 0 + (2 * (avgEth + 2));
-    } else if (avgEth < -2) {
-        rating = 0;
+    if (avgEthLength < 15) {
+        rating += 0;
+    } else if (avgEthLength >= 15 && avgEthLength < 17) {
+        rating += 0 + variableRating;
+    } else if (avgEthLength >= 17 && avgEthLength < 20) {
+        rating += 10 + variableRating;
+    } else if (avgEthLength >= 20 && avgEthLength < 22) {
+        rating += 20 + variableRating;
+    } else if (avgEthLength >= 22) {
+        rating += 30;
     }
 
     return rating.toFixed(2);
-};
-
-const getAccountAge = (firstTx) => {
-    const txTimestamp = Number(firstTx.timeStamp);
-    const timeDiff = currentUnixTimestamp() - txTimestamp;
-    const age = Math.floor(timeDiff / (60 * 60 * 24));
-    return age;
 };
 
 module.exports = { getAccountRating };
