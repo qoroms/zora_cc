@@ -1,7 +1,8 @@
 const { default: BigNumber } = require("bignumber.js");
 const { getTransactions } = require("./etherscan");
+const { currentUnixTimestamp } = require("./time");
 
-const getAccountRating = (account) => {
+const getAccountRatingAndAge = (account) => {
     return new Promise(async (resolve) => {
         let totalEthIn = new BigNumber(0);
         let totalEthOut = new BigNumber(0);
@@ -38,7 +39,9 @@ const getAccountRating = (account) => {
                     Number(totalBlocks),
                 );
 
-                resolve(rating);
+                let age = getAccountAge(transactions[0]);
+
+                resolve({ rating, age });
             }
         }
     });
@@ -95,4 +98,11 @@ const calculateRating = (totalEthIn, totalEthOut, totalBlocks) => {
     return rating.toFixed(2);
 };
 
-module.exports = { getAccountRating };
+const getAccountAge = (firstTx) => {
+    const txTimestamp = Number(firstTx.timeStamp);
+    const timeDiff = currentUnixTimestamp() - txTimestamp;
+    const age = Math.floor(timeDiff / (60 * 60 * 24));
+    return age;
+};
+
+module.exports = { getAccountRatingAndAge };
