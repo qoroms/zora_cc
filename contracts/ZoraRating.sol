@@ -1,15 +1,20 @@
-// SPDX-License-Identifier: UNDEFINED
+// SPDX-License-Identifier: UNLICENSED
 
 pragma solidity >=0.6.0 <0.7.0;
 
 import "github.com/oraclize/ethereum-api/provableAPI_0.6.sol";
 
 contract ZoraRating is usingProvable {
-    event LogNewProvableQuery(string description);
-    event LogNewUAddressRating(address walletAddress, string rating);
+    struct Rating {
+        string rating;
+        uint256 updatedAt;
+    }
 
     mapping(bytes32 => address) internal queryIdAddress;
-    mapping(address => string) internal addressRating;
+    mapping(address => Rating) internal addressRating;
+
+    event NewUpdateRatingRequest(address walletAddress, string description);
+    event AddressRatingUpdated(address walletAddress, string rating);
 
     // Update address rating using provable
     function updateRating(address walletAddress) public payable {
@@ -27,7 +32,8 @@ contract ZoraRating is usingProvable {
                 )
             );
 
-        emit LogNewProvableQuery(
+        emit NewUpdateRatingRequest(
+            walletAddress,
             "Provable query was sent, standing by for the answer..."
         );
 
@@ -41,7 +47,16 @@ contract ZoraRating is usingProvable {
         view
         returns (string memory)
     {
-        return addressRating[walletAddress];
+        return addressRating[walletAddress].rating;
+    }
+
+    // Function to fetch address last updated timestamp
+    function getLastUpdatedTimestamp(address walletAddress)
+        public
+        view
+        returns (uint256)
+    {
+        return addressRating[walletAddress].updatedAt;
     }
 
     function __callback(bytes32 queryId, string memory rating) public override {
@@ -51,10 +66,10 @@ contract ZoraRating is usingProvable {
         );
 
         address walletAddress = queryIdAddress[queryId];
-        addressRating[walletAddress] = rating;
+        addressRating[walletAddress] = Rating(rating, block.timestamp);
         delete queryIdAddress[queryId];
 
-        emit LogNewUAddressRating(walletAddress, rating);
+        emit AddressRatingUpdated(walletAddress, rating);
     }
 
     function toString(bytes memory data) internal pure returns (string memory) {

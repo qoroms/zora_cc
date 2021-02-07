@@ -4,12 +4,18 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "walletAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "string",
-        "name": "description",
+        "name": "rating",
         "type": "string"
       }
     ],
-    "name": "LogNewProvableQuery",
+    "name": "AddressRatingUdated",
     "type": "event"
   },
   {
@@ -24,11 +30,11 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "rating",
+        "name": "description",
         "type": "string"
       }
     ],
-    "name": "LogNewUAddressRating",
+    "name": "NewUpdateRatingRequest",
     "type": "event"
   },
   {
@@ -70,6 +76,25 @@
     "name": "__callback",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "walletAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getLastUpdatedTimestamp",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

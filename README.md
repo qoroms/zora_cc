@@ -1,3 +1,3 @@
 # ZORA CC
 
-#### Kovan Address: [0x0EC7776e841636981873ad2c869886E0D84a9FEe](https://kovan.etherscan.io/address/0x0EC7776e841636981873ad2c869886E0D84a9FEe)
+#### Kovan Address: [0x639531c5eCdeAeA73d679BEf0f58F4fD18E52acA](https://kovan.etherscan.io/address/0x639531c5eCdeAeA73d679BEf0f58F4fD18E52acA)
