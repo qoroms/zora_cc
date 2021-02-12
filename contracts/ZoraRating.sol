@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.7.0;
 
@@ -17,7 +17,7 @@ contract ZoraRating is usingProvable {
     event AddressRatingUpdated(address walletAddress, string rating);
 
     // Update address rating using provable
-    function updateRating(address walletAddress) public payable {
+    function updateRating(address walletAddress) external payable {
         require(
             provable_getPrice("URL") <= address(this).balance,
             "Provable query will NOT be sent, please add some ETH to cover for the query fee !!"
@@ -26,7 +26,7 @@ contract ZoraRating is usingProvable {
         string memory _url =
             string(
                 abi.encodePacked(
-                    "json(http://gov.zoracles.com/rating/",
+                    "json(https://credit.zoracles.com/rating/",
                     toString(abi.encodePacked(walletAddress)),
                     ").result.rating"
                 )
