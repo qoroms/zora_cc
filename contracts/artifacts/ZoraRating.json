@@ -15,7 +15,7 @@
         "type": "string"
       }
     ],
-    "name": "AddressRatingUdated",
+    "name": "AddressRatingUpdated",
     "type": "event"
   },
   {
@@ -86,6 +86,19 @@
         "type": "address"
       }
     ],
+    "name": "updateRating",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "walletAddress",
+        "type": "address"
+      }
+    ],
     "name": "getLastUpdatedTimestamp",
     "outputs": [
       {
@@ -114,19 +127,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "walletAddress",
-        "type": "address"
-      }
-    ],
-    "name": "updateRating",
-    "outputs": [],
-    "stateMutability": "payable",
     "type": "function"
   }
 ]

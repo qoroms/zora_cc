@@ -26,7 +26,7 @@ contract ZoraRating is usingProvable {
         string memory _url =
             string(
                 abi.encodePacked(
-                    "json(https://credit.zoracles.com/rating/",
+                    "json(https://zora.cc/rating/",
                     toString(abi.encodePacked(walletAddress)),
                     ").result.rating"
                 )
