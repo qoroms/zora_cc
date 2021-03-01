@@ -12,8 +12,7 @@ router.get('/rating/:account', async (req, res, next) => {
     res.status(200).json({
         status: true,
         result: {
-            rating: data.rating,
-            age: data.age,
+            ...data,
             ethBalance: web3.utils.fromWei(ethBalance),
             txCount,
         }
