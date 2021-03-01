@@ -54,7 +54,7 @@ const calculateRating = (totalEthIn, totalEthOut, totalBlocks) => {
         rating += 0;
     } else if (totalBlocks > 200 && totalBlocks <= 1000) {
         rating += 6 * (totalBlocks / 1000);
-    } else if (totalBlocks > 101 && totalBlocks <= 10000) {
+    } else if (totalBlocks > 1001 && totalBlocks <= 10000) {
         rating += 6 + (6 * (totalBlocks / 10000))
     } else if (totalBlocks > 10001 && totalBlocks <= 100000) {
         rating += 12 + (6 * (totalBlocks / 100000))
