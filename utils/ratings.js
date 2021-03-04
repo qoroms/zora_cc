@@ -1,9 +1,9 @@
 const { default: BigNumber } = require("bignumber.js");
 const { getTransactions } = require("./etherscan");
 const { currentUnixTimestamp } = require("./time");
-const { getTotalBlocksNumber, getTotalEth, getGweiRating, getAgeRating, getNonceRating } = require('./getRating');
+const { getTotalBlocksNumber, getTotalEth, getGweiRating, getAgeRating, getNonceRating, getTotalGasSpent } = require('./getRating');
 
-const getAccountRatingAndAge = (account) => {
+const getAccountMainInfo = (account) => {
     return new Promise(async (resolve) => {
         let totalEthIn = new BigNumber(0);
         let totalEthOut = new BigNumber(0);
@@ -14,7 +14,7 @@ const getAccountRatingAndAge = (account) => {
         const firstTxBlock = transactions[0].blockNumber;
         const lastTxBlock = transactions[transactions.length - 1].blockNumber;
         const totalBlocks = Number(lastTxBlock) - Number(firstTxBlock);
-        // console.log(transactions[transactions.length - 1])
+        console.log(transactions[transactions.length - 1])
         for (let i = 0; i < transactions.length; i++) {
             if (
                 Number(transactions[i].isError) === 0 &&
@@ -46,31 +46,37 @@ const getAccountRatingAndAge = (account) => {
                 if (maxGwei.comparedTo(new BigNumber(transactions[i].gasPrice)) < 0) {
                     maxGwei = new BigNumber(transactions[i].gasPrice)
                 }
+                totalGasSpent = totalGasSpent.plus(new BigNumber(transactions[i].gasPrice)
+                    .multipliedBy(new BigNumber(transactions[i].gasUsed))
+                    .div(new BigNumber(10).pow(18)))
             }
 
             if (i === transactions.length - 1) {
                 const maxGweiNumber = new Number(maxGwei.dividedBy(new BigNumber(10).pow(9)))
                 let age = getAccountAge(transactions[0]);
+                console.log('totalGasSpent', Number(totalGasSpent))
                 const rating = calculateRating(
                     totalEthIn,
                     totalEthOut,
                     Number(totalBlocks),
                     maxGweiNumber,
                     age,
-                    maxNonce
+                    maxNonce,
+                    Number(totalGasSpent)
                 );
-                resolve({ rating, age, maxNonce, maxGwei: maxGweiNumber });
+                resolve({ rating, age, maxNonce, maxGwei: maxGweiNumber, totalGasSpent: Number(totalGasSpent) });
             }
         }
     });
 };
 
-const calculateRating = (totalEthIn, totalEthOut, totalBlocks, maxGwei, age, maxNonce) => {
+const calculateRating = (totalEthIn, totalEthOut, totalBlocks, maxGwei, age, maxNonce, totalGasSpent) => {
     let rating = getTotalBlocksNumber(totalBlocks); // 70
     rating += getTotalEth(totalEthIn, totalEthOut); // 30
     rating += getGweiRating(maxGwei); // 50
     rating += getAgeRating(age); // 40
     rating += getNonceRating(maxNonce); // 40
+    rating += getTotalGasSpent(totalGasSpent); // 50
 
     return rating.toFixed(2);
 };
@@ -82,4 +88,4 @@ const getAccountAge = (firstTx) => {
     return age;
 };
 
-module.exports = { getAccountRatingAndAge };
+module.exports = { getAccountMainInfo };

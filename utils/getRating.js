@@ -1,5 +1,14 @@
 const { default: BigNumber } = require("bignumber.js");
 
+const getNumberByRange = (score, range, numbers) => {
+	for (let i = 0; i < range.length; i++) {
+		if (score < range[i]) {
+			return numbers[i]
+		}
+	}
+	return numbers[numbers.length - 1];
+}
+
 const getTotalBlocksNumber = (totalBlocks) => { // max is 70
 	let rating = 0;
 
@@ -57,72 +66,35 @@ const getTotalEth = (totalEthIn, totalEthOut) => { // max is 30
 }
 
 const getGweiRating = (gwei) => { // max is 50
-	let rating = 0;
-
-	if (gwei <= 200) {
-		rating = 10;
-	} else if (gwei <= 300) {
-		rating = 15;
-	} else if (gwei <= 400) {
-		rating = 20;
-	} else if (gwei <= 500) {
-		rating = 25;
-	} else if (gwei <= 600) {
-		rating = 30;
-	} else if (gwei <= 700) {
-		rating = 35;
-	} else if (gwei <= 800) {
-		rating = 40;
-	} else if (gwei <= 900) {
-		rating = 45;
-	} else if (gwei > 900) {
-		rating = 50;
-	}
-
-	return rating;
+	return getNumberByRange(
+		gwei,
+		[200, 300, 400, 500, 600, 700, 800, 900],
+		[10, 15, 20, 25, 30, 35, 40, 45, 50]
+	);
 }
 
 const getAgeRating = (age) => {
-	let rating = 0;
-	if (age < 60) {
-		rating = 10;
-	} else if (age < 120) {
-		rating = 15;
-	} else if (age < 240) {
-		rating = 20;
-	} else if (age < 360) {
-		rating = 25;
-	} else if (age < 720) {
-		rating = 30;
-	} else if (age < 1080) {
-		rating = 35;
-	} else if (age > 1080) {
-		rating = 40;
-	}
-	return rating;
+	return getNumberByRange(
+		age,
+		[60, 120, 240, 360, 720, 1080],
+		[10, 15, 20, 25, 30, 35, 40]
+	);
 }
 
 const getNonceRating = (nonce) => {
-	let rating = 0;
-	if (nonce < 100) {
-		rating = 10;
-	} else if (nonce < 200) {
-		rating = 15;
-	} else if (nonce < 400) {
-		rating = 20;
-	} else if (nonce < 600) {
-		rating = 25;
-	} else if (nonce < 800) {
-		rating = 30;
-	} else if (nonce < 1000) {
-		rating = 35;
-	} else if (nonce < 1500) {
-		rating = 40;
-	} else if (nonce < 2000) {
-		rating = 45;
-	} else if (nonce > 2000) {
-		rating = 50;
-	}
+	return getNumberByRange(
+		nonce,
+		[100, 200, 400, 600, 800, 1000, 1500, 2000],
+		[10, 15, 20, 25, 30, 35, 40, 45, 50]
+	);
 }
 
-module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating, getAgeRating, getNonceRating }
+const getTotalGasSpent = (gasSpent) => {
+	return getNumberByRange(
+		gasSpent,
+		[1, 2, 3, 4, 5, 6, 7, 8, 9],
+		[5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+	);
+}
+
+module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating, getAgeRating, getNonceRating, getTotalGasSpent }
