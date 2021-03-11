@@ -5,8 +5,13 @@
 #### Rating Calc Formula
 
 Total Blocks Number // 70
+
 Total Eth // 30
+
 Max Gwei // 50
+
 Account created age // 40
+
 Max nonce - tx count // 40
+
 Gas spent // 50
