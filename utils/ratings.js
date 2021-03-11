@@ -1,6 +1,8 @@
 const { default: BigNumber } = require("bignumber.js");
 const { getTransactions } = require("./etherscan");
 const { currentUnixTimestamp } = require("./time");
+const { getInfo } = require('./zerion');
+const { getDefiInfo } = require('./defiSDK');
 const { getTotalBlocksNumber, getTotalEth, getGweiRating, getAgeRating, getNonceRating, getTotalGasSpent } = require('./getRating');
 
 const getAccountMainInfo = (account) => {
@@ -14,7 +16,7 @@ const getAccountMainInfo = (account) => {
         const firstTxBlock = transactions[0].blockNumber;
         const lastTxBlock = transactions[transactions.length - 1].blockNumber;
         const totalBlocks = Number(lastTxBlock) - Number(firstTxBlock);
-        console.log(transactions[transactions.length - 1])
+        // console.log(transactions[transactions.length - 1])
         for (let i = 0; i < transactions.length; i++) {
             if (
                 Number(transactions[i].isError) === 0 &&
@@ -54,7 +56,10 @@ const getAccountMainInfo = (account) => {
             if (i === transactions.length - 1) {
                 const maxGweiNumber = new Number(maxGwei.dividedBy(new BigNumber(10).pow(9)))
                 let age = getAccountAge(transactions[0]);
-                console.log('totalGasSpent', Number(totalGasSpent))
+
+                const info = await getInfo(account);
+                // getDefiInfo();
+
                 const rating = calculateRating(
                     totalEthIn,
                     totalEthOut,
