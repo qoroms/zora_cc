@@ -1,18 +1,8 @@
 const io = require('socket.io-client');
-
-const BASE_URL = 'wss://api-v4.zerion.io/';
-
-const assetsSocket = {
-  namespace: 'address',
-  socket: io(`${BASE_URL}address`, {
-    transports: ['websocket'],
-    timeout: 60000,
-    query: {
-      api_token:
-        process.env.ZERION_KEY
-    },
-  }),
-};
+const { default: BigNumber } = require("bignumber.js");
+const { zeronKey } = require("./config");
+const FALLBACK_URL = 'wss://api-v4.zerion.io/';
+const BASE_URL = FALLBACK_URL;
 
 function verify(request, response) {
   // each value in request payload must be found in response meta
@@ -30,7 +20,10 @@ function get(socketNamespace, requestBody) {
   return new Promise(resolve => {
     const { socket, namespace } = socketNamespace;
     function handleReceive(data) {
-      if (verify(requestBody, data)) {
+      unsubscribe();
+      resolve(data);
+      if (verify(requestBody, data)) 
+      {
         unsubscribe();
         resolve(data);
       }
@@ -45,18 +38,290 @@ function get(socketNamespace, requestBody) {
   });
 }
 
-function getInfo(address) {
-  return new Promise((resolve) => {
-    get(assetsSocket, {
-      scope: ['portfolio'],
+const getAssets = (address) => {
+	console.log("getAssets", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['assets'],
       payload: {
-        address, currency: 'USD', portfolio_fields: 'all'
+      address:address,
+      currency: 'usd',
+      offset: 0,
+      limit: 1000,
+      },
+    }).then(data => {
+      const assets = data.payload.assets;
+      let total = 0;
+      for(key in assets) {
+        const item = assets[key];
+        const {asset: { name, price, decimals }, quantity} = item;
+        const q = quantity / Math.pow(10, decimals);
+        if (price)
+          total += price.value * q;
+      }
+      return total;
+    });
+}
+
+const getLockedAssets = (address) => {
+	console.log("getLockedAssets", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['locked-assets'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      offset: 0,
+      limit: 1000,
+      },
+    }).then(data => {
+      const assets = data.payload['locked-assets'];
+      let total = 0;
+      assets.forEach(item => {
+        total = total + item.value;
+      })
+      return total;
+    });
+}
+
+const getMaxInHistory = (address) => {
+	//console.log("getMaxInHistory", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['charts'],
+      payload: {
+      address:address,
+      charts_type: 'y',
+      currency: 'usd',
       },
     }).then(response => {
-      console.log(response.payload.info);
-      resolve(response);
+      const {payload} = response;
+      const charts = payload.charts.others;
+      let max = 0;
+      charts.forEach(item => {
+        if (item[1] > max)
+          max = item[1];
+      })
+      return max;
     });
+}
+
+const getUniswapTransactions = (address) => {
+	//console.log("getUniswapTransactions", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000,
+      transactions_offset: 0,
+      transactions_search_query: 'Uniswap'
+      },
+    }).then(response => {
+      const {payload} = response;
+      const {transactions} = payload;
+      let sent, received, trading, exchangefee;
+      sent = received = trading = 0;
+      exchangefee = {
+        ETH: 0,
+        USD: 0
+      }
+      transactions.forEach(trx => {
+        const {type, changes, fee, status} = trx;
+        if (status != 'confirmed')
+          return;
+        changes.forEach(ast => {
+          const {asset: {symbol, decimals}, value} = ast;
+          if (symbol == 'UNI-V2') {
+            const uniswap_value = value / Math.pow(10, decimals);
+            switch(type) {
+              case 'trade':
+                trading += uniswap_value;
+                break;
+              case 'receive':
+                received += uniswap_value;
+                break;
+              case 'send':
+                sent += uniswap_value;
+                break;
+              default:
+                break;
+            }
+            if (fee) {
+              fee_value = fee.value / Math.pow(10, 18);
+              exchangefee.ETH += fee_value; //Eth decimal 18
+              exchangefee.USD += fee_value * fee.price;
+            }
+          }
+        })
+      })
+      return {
+        sent, received, trading, exchangefee
+      }
+    });
+}
+
+const getSushiTransactions = (address) => {
+	//console.log("getSushiTransactions", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000,
+      transactions_offset: 0,
+      transactions_search_query: 'sushi'
+      },
+    }).then(response => {
+      const {payload} = response;
+      const {transactions} = payload;
+      let sent, received, trading, exchangefee;
+      sent = received = trading = 0;
+      exchangefee = {
+        ETH: 0,
+        USD: 0
+      }
+      transactions.forEach(trx => {
+        const {type, changes, fee, status} = trx;
+        if (status != 'confirmed')
+          return;
+        changes.forEach(ast => {
+          const {asset: {symbol, decimals}, value} = ast;
+          if (symbol == 'SLP') {
+            const sushi_value = value / Math.pow(10, decimals);
+            switch(type) {
+              case 'trade':
+                trading += sushi_value;
+                break;
+              case 'receive':
+                received += sushi_value;
+                break;
+              case 'send':
+                sent += sushi_value;
+                break;
+              default:
+                break;
+            }
+            if (fee) {
+              fee_value = fee.value / Math.pow(10, 18);
+              exchangefee.ETH += fee_value; //Eth decimal 18
+              exchangefee.USD += fee_value * fee.price;
+            }
+          }
+        })
+      })
+      return {
+        sent, received, trading, exchangefee
+      }
+    });
+}
+
+const getPortfolio = (address) => {
+	//console.log("start uniswap", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['portfolio'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      portfolio_fields: 'all'
+      },
+    }).then(data => {
+      const { portfolio } = data.payload;
+      return portfolio;
+    });
+}
+
+const getFullDetail = (address) => {
+  return Promise.all([
+    getPortfolio(address),
+    getMaxInHistory(address),
+    getUniswapTransactions(address),
+    getSushiTransactions(address),
+  ]).then(res => {
+    return {
+      portfolio: res[0],
+      max: res[1],
+      uniswap: res[2],
+      sushi: res[3]
+    }
   })
 }
 
-module.exports = { getInfo }
+//getFullDetail("0xd4004f07d7b746103f2d9b4e5b5a540864526bec");
+module.exports = {
+  getAssets,
+  getLockedAssets,
+  getMaxInHistory,
+  getUniswapTransactions,
+  getSushiTransactions,
+  getFullDetail
+}
