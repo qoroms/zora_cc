@@ -15,3 +15,9 @@ Account created age // 40
 Max nonce - tx count // 40
 
 Gas spent // 50
+
+Max Value and Current value  // 50
+
+Uniswap rating // 30
+
+Sushi rating // 30

@@ -97,4 +97,32 @@ const getTotalGasSpent = (gasSpent) => {
 	);
 }
 
-module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating, getAgeRating, getNonceRating, getTotalGasSpent }
+const getEtherRating = (total, max) => {
+    const v = total * 0.6 + max * 0.4;
+    return getNumberByRange(
+        v,
+        [0, 0.00001, 1, 10, 50, 100, 500, 1000, 2000, 5000, 10000, 15000, 20000],
+        [0, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    )
+}
+
+const getUniswapRating = (uniswapTotal) => {
+    return getNumberByRange(
+        uniswapTotal,
+        [0, 1, 10, 50, 100, 500, 1000, 10000],
+        [0, 5, 10, 15, 20, 25, 30]
+    )
+}
+
+const getSushiRating = (sushiTotal) => {
+    return getNumberByRange(
+        sushiTotal,
+        [0, 1, 5, 10, 20, 50, 100, 1000],
+        [0, 5, 10, 15, 20, 25, 30]
+    )
+
+}
+
+module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
+     getAgeRating, getNonceRating, getTotalGasSpent,
+     getEtherRating, getUniswapRating, getSushiRating }

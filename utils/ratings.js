@@ -3,7 +3,9 @@ const { getTransactions } = require("./etherscan");
 const { currentUnixTimestamp } = require("./time");
 const { getFullDetail } = require('./zerion');
 const { getDefiInfo } = require('./defiSDK');
-const { getTotalBlocksNumber, getTotalEth, getGweiRating, getAgeRating, getNonceRating, getTotalGasSpent } = require('./getRating');
+const { getTotalBlocksNumber, getTotalEth, getGweiRating,
+     getAgeRating, getNonceRating, getTotalGasSpent,
+     getEtherRating, getUniswapRating, getSushiRating } = require('./getRating');
 
 const getAccountMainInfo = (account) => {
     return new Promise(async (resolve) => {
@@ -67,7 +69,11 @@ const getAccountMainInfo = (account) => {
                     maxGweiNumber,
                     age,
                     maxNonce,
-                    Number(totalGasSpent)
+                    Number(totalGasSpent),
+                    info.portfolio.total_value,
+                    info.max,
+                    info.uniswap,
+                    info.sushi
                 );
                 resolve({ rating, age, maxNonce, maxGwei: maxGweiNumber, totalGasSpent: Number(totalGasSpent), extra: info });
             }
@@ -75,17 +81,29 @@ const getAccountMainInfo = (account) => {
     });
 };
 
-const calculateRating = (totalEthIn, totalEthOut, totalBlocks, maxGwei, age, maxNonce, totalGasSpent) => {
+const calculateRating = (
+    totalEthIn,
+    totalEthOut,
+    totalBlocks,
+    maxGwei,
+    age,
+    maxNonce,
+    totalGasSpent,
+    totalValue,
+    maxValue,
+    uniswap,
+    sushi) => {
     let rating = getTotalBlocksNumber(totalBlocks); // 70
     rating += getTotalEth(totalEthIn, totalEthOut); // 30
     rating += getGweiRating(maxGwei); // 50
     rating += getAgeRating(age); // 40
     rating += getNonceRating(maxNonce); // 40
     rating += getTotalGasSpent(totalGasSpent); // 50
-
+    rating += getEtherRating(totalValue, maxValue); // 50
+    rating += getUniswapRating(uniswap.sent + uniswap.receive + uniswap.trading); //30
+    rating += getSushiRating(sushi.sent + sushi.receive + sushi.trading) // 30
     return rating.toFixed(2);
 };
-
 const getAccountAge = (firstTx) => {
     const txTimestamp = Number(firstTx.timeStamp);
     const timeDiff = currentUnixTimestamp() - txTimestamp;
