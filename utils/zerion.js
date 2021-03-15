@@ -141,6 +141,7 @@ const getMaxInHistory = (address) => {
 
 const getUniswapTransactions = (address) => {
 	//console.log("getUniswapTransactions", address);
+  //uniswap-v2 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -160,7 +161,7 @@ const getUniswapTransactions = (address) => {
       currency: 'usd',
       transactions_limit: 10000,
       transactions_offset: 0,
-      transactions_search_query: 'Uniswap'
+      transactions_search_query: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
       },
     }).then(response => {
       const {payload} = response;
@@ -177,7 +178,7 @@ const getUniswapTransactions = (address) => {
           return;
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
-          if (symbol == 'UNI-V2') {
+          if (symbol == 'ETH') {
             const uniswap_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
@@ -208,6 +209,7 @@ const getUniswapTransactions = (address) => {
 
 const getSushiTransactions = (address) => {
 	//console.log("getSushiTransactions", address);
+  //sushi 0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -227,7 +229,7 @@ const getSushiTransactions = (address) => {
       currency: 'usd',
       transactions_limit: 10000,
       transactions_offset: 0,
-      transactions_search_query: 'sushi'
+      transactions_search_query: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
       },
     }).then(response => {
       const {payload} = response;
@@ -244,7 +246,7 @@ const getSushiTransactions = (address) => {
           return;
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
-          if (symbol == 'SLP') {
+          if (symbol == 'ETH') {
             const sushi_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
@@ -315,8 +317,11 @@ const getFullDetail = (address) => {
     }
   })
 }
-
-//getFullDetail("0xd4004f07d7b746103f2d9b4e5b5a540864526bec");
+//0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
+//0xd4004f07d7b746103f2d9b4e5b5a540864526bec
+/*getFullDetail("0xd4004f07d7b746103f2d9b4e5b5a540864526bec").then(res => {
+  console.log(res);
+});*/
 module.exports = {
   getAssets,
   getLockedAssets,
