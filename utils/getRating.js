@@ -106,6 +106,14 @@ const getEtherRating = (total, max) => {
     )
 }
 
+const getBscRating = (bsc) => {
+    return getNumberByRange(
+        bsc,
+        [0, 0.00001, 10, 20, 30, 40, 50, 100, 200, 500, 1000],
+        [0, 0, 1, 2, 3, 4, 5, 10, 15, 20]
+    )
+}
+
 const getUniswapRating = (uniswapTotal) => {
     return getNumberByRange(
         uniswapTotal,
@@ -125,4 +133,4 @@ const getSushiRating = (sushiTotal) => {
 
 module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
-     getEtherRating, getUniswapRating, getSushiRating }
+     getEtherRating, getBscRating, getUniswapRating, getSushiRating }

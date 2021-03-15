@@ -5,7 +5,7 @@ const { getFullDetail } = require('./zerion');
 const { getDefiInfo } = require('./defiSDK');
 const { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
-     getEtherRating, getUniswapRating, getSushiRating } = require('./getRating');
+     getEtherRating, getBscRating, getUniswapRating, getSushiRating } = require('./getRating');
 
 const getAccountMainInfo = (account) => {
     return new Promise(async (resolve) => {
@@ -71,6 +71,7 @@ const getAccountMainInfo = (account) => {
                     maxNonce,
                     Number(totalGasSpent),
                     info.portfolio.total_value,
+                    info.portfolio.bsc_assets_value,
                     info.max,
                     info.uniswap,
                     info.sushi
@@ -91,6 +92,7 @@ const calculateRating = (
     totalGasSpent,
     totalValue,
     maxValue,
+    bscValue,
     uniswap,
     sushi) => {
     let rating = getTotalBlocksNumber(totalBlocks); // 70
@@ -100,6 +102,7 @@ const calculateRating = (
     rating += getNonceRating(maxNonce); // 40
     rating += getTotalGasSpent(totalGasSpent); // 50
     rating += getEtherRating(totalValue, maxValue); // 50
+    rating += getBscRating(bscValue); // 20
     rating += getUniswapRating(uniswap.sent + uniswap.receive + uniswap.trading); //30
     rating += getSushiRating(sushi.sent + sushi.receive + sushi.trading) // 30
     return rating.toFixed(2);

@@ -18,6 +18,8 @@ Gas spent // 50
 
 Max Value and Current value  // 50
 
+BSC rating // 20
+
 Uniswap rating // 30
 
 Sushi rating // 30

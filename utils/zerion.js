@@ -319,7 +319,7 @@ const getFullDetail = (address) => {
 }
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getFullDetail("0xd4004f07d7b746103f2d9b4e5b5a540864526bec").then(res => {
+/*getPortfolio("0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7").then(res => {
   console.log(res);
 });*/
 module.exports = {
