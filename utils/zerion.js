@@ -275,6 +275,75 @@ const getSushiTransactions = (address) => {
     });
 }
 
+
+const getZoraTransactions = (address) => {
+	//console.log("getZoraTransactions", address);
+  //sushi 0xd8e3fb3b08eba982f2754988d70d57edc0055ae6
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000,
+      transactions_offset: 0,
+      transactions_search_query: '0xd8e3fb3b08eba982f2754988d70d57edc0055ae6'
+      },
+    }).then(response => {
+      const {payload} = response;
+      const {transactions} = payload;
+      let sent, received, trading, exchangefee;
+      sent = received = trading = 0;
+      exchangefee = {
+        ETH: 0,
+        USD: 0
+      }
+      transactions.forEach(trx => {
+        const {type, changes, fee, status} = trx;
+        if (status != 'confirmed')
+          return;
+        changes.forEach(ast => {
+          const {asset: {symbol, decimals}, value} = ast;
+          if (symbol == 'ZORA') {
+            const zora_value = value / Math.pow(10, decimals);
+            switch(type) {
+              case 'trade':
+                trading += zora_value;
+                break;
+              case 'receive':
+                received += zora_value;
+                break;
+              case 'send':
+                sent += zora_value;
+                break;
+              default:
+                break;
+            }
+            if (fee) {
+              fee_value = fee.value / Math.pow(10, 18);
+              exchangefee.ETH += fee_value; //Eth decimal 18
+              exchangefee.USD += fee_value * fee.price;
+            }
+          }
+        })
+      })
+      return {
+        sent, received, trading, exchangefee
+      }
+    });
+}
+
 const getPortfolio = (address) => {
 	//console.log("start uniswap", address);
   const assetsSocket = {
@@ -308,18 +377,20 @@ const getFullDetail = (address) => {
     getMaxInHistory(address),
     getUniswapTransactions(address),
     getSushiTransactions(address),
+    getZoraTransactions(address)
   ]).then(res => {
     return {
       portfolio: res[0],
       max: res[1],
       uniswap: res[2],
-      sushi: res[3]
+      sushi: res[3],
+      zora: res[4],
     }
   })
 }
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getPortfolio("0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7").then(res => {
+/*getFullDetail("0x07529a0dbeaa96754f7296db6c0aca9224601917").then(res => {
   console.log(res);
 });*/
 module.exports = {

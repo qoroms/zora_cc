@@ -128,9 +128,17 @@ const getSushiRating = (sushiTotal) => {
         [0, 1, 5, 10, 20, 50, 100, 1000],
         [0, 5, 10, 15, 20, 25, 30]
     )
+}
 
+const getZoraRating = (zoraTotal) => {
+    return getNumberByRange(
+        zoraTotal,
+        [0, 1, 5, 10, 20, 30, 40, 50, 100, 200, 500, 1000],
+        [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    )
 }
 
 module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
-     getEtherRating, getBscRating, getUniswapRating, getSushiRating }
+     getEtherRating, getBscRating, getUniswapRating, getSushiRating,
+     getZoraRating}

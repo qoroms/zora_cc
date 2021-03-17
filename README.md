@@ -23,3 +23,5 @@ BSC rating // 20
 Uniswap rating // 30
 
 Sushi rating // 30
+
+Zora rating // 50
