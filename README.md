@@ -25,3 +25,5 @@ Uniswap rating // 30
 Sushi rating // 30
 
 Zora rating // 50
+
+Compound rating // 15
