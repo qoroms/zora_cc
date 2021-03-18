@@ -146,8 +146,16 @@ const getCompoundRating = (compTotal) => {
     )
 }
 
+const getYFIRating = (yfiTotal) => {
+    return getNumberByRange(
+        yfiTotal,
+        [0, 0.01, 1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150],
+        [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
+    )
+}
+
 
 module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
-     getZoraRating, getCompoundRating}
+     getZoraRating, getCompoundRating, getYFIRating}

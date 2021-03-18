@@ -412,6 +412,75 @@ const getCompoundTransactions = (address) => {
     });
 }
 
+const getYFITransactions = (address) => {
+	//console.log("getYFITransactions", address);
+  //YFI 0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e Ygov.finance: YFI Token
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000,
+      transactions_offset: 0,
+      transactions_search_query: '0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e'
+      },
+    }).then(response => {
+      const {payload} = response;
+      const {transactions} = payload;
+      //console.log(JSON.stringify(transactions));
+      let sent, received, trading, exchangefee;
+      sent = received = trading = 0;
+      exchangefee = {
+        ETH: 0,
+        USD: 0
+      }
+      transactions.forEach(trx => {
+        const {type, changes, fee, status} = trx;
+        if (status != 'confirmed')
+          return;
+        changes.forEach(ast => {
+          const {asset: {symbol, decimals}, value} = ast;
+          if (symbol == 'YFI') {
+            const zora_value = value / Math.pow(10, decimals);
+            switch(type) {
+              case 'trade':
+                trading += zora_value;
+                break;
+              case 'receive':
+                received += zora_value;
+                break;
+              case 'send':
+                sent += zora_value;
+                break;
+              default:
+                break;
+            }
+            if (fee) {
+              fee_value = fee.value / Math.pow(10, 18);
+              exchangefee.ETH += fee_value; //Eth decimal 18
+              exchangefee.USD += fee_value * fee.price;
+            }
+          }
+        })
+      })
+      return {
+        sent, received, trading, exchangefee
+      }
+    });
+}
+
 const getPortfolio = (address) => {
 	//console.log("start uniswap", address);
   const assetsSocket = {
@@ -447,6 +516,7 @@ const getFullDetail = (address) => {
     getSushiTransactions(address),
     getZoraTransactions(address),
     getCompoundTransactions(address),
+    getYFITransactions(address),
   ]).then(res => {
     return {
       portfolio: res[0],
@@ -454,7 +524,8 @@ const getFullDetail = (address) => {
       uniswap: res[2],
       sushi: res[3],
       zora: res[4],
-      comp: res[5]
+      comp: res[5],
+      yfi: res[6]
     }
   })
 }
@@ -462,7 +533,7 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getCompoundTransactions("0x70e7054c00fe1a0055d3b09312f3e95810d1898f").then(res => {
+/*getYFITransactions("0x81759b0466EEB57f55DC2663d045b1BE9c0AB182").then(res => {
   console.log(res);
 });*/
 module.exports = {

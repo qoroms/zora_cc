@@ -6,7 +6,7 @@ const { getDefiInfo } = require('./defiSDK');
 const { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
-     getZoraRating, getCompoundRating } = require('./getRating');
+     getZoraRating, getCompoundRating, getYFIRating } = require('./getRating');
 
 const getAccountMainInfo = (account) => {
     return new Promise(async (resolve) => {
@@ -77,7 +77,8 @@ const getAccountMainInfo = (account) => {
                     info.uniswap,
                     info.sushi,
                     info.zora,
-                    info.comp
+                    info.comp,
+                    info.yfi
                 );
                 resolve({ rating, age, maxNonce, maxGwei: maxGweiNumber, totalGasSpent: Number(totalGasSpent), extra: info });
             }
@@ -99,7 +100,8 @@ const calculateRating = (
     uniswap,
     sushi,
     zora,
-    comp) => {
+    comp,
+    yfi) => {
     let rating = getTotalBlocksNumber(totalBlocks); // 70
     rating += getTotalEth(totalEthIn, totalEthOut); // 30
     rating += getGweiRating(maxGwei); // 50
@@ -112,6 +114,7 @@ const calculateRating = (
     rating += getSushiRating(sushi.sent + sushi.receive + sushi.trading) // 30
     rating += getZoraRating(zora.sent + zora.receive + zora.trading) // 50
     rating += getCompoundRating(comp.sent + comp.receive + comp.trading) // 15
+    rating += getYFIRating(yfi.sent + yfi.receive + yfi.trading) // 60
     return rating.toFixed(2);
 };
 const getAccountAge = (firstTx) => {

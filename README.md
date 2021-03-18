@@ -27,3 +27,5 @@ Sushi rating // 30
 Zora rating // 50
 
 Compound rating // 15
+
+YFI rating // 60
