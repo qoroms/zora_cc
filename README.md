@@ -29,3 +29,5 @@ Zora rating // 50
 Compound rating // 15
 
 YFI rating // 60
+
+Pickle rating // 50
