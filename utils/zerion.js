@@ -509,7 +509,7 @@ const getPortfolio = (address) => {
 }
 
 const getTransactions = (address) => {
-	//console.log("start uniswap", address);
+	//console.log("getTransactions", address);
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -525,19 +525,21 @@ const getTransactions = (address) => {
   return get(assetsSocket, {
       scope: ['transactions'],
       payload: {
-      address:address,
-      currency: 'usd',
-      transactions_limit: 10000
+        address: address,
+        currency: 'usd',
+        transactions_limit: 10000
       },
     }).then(data => {
       const { transactions } = data.payload;
-      console.log("length", transactions.length)
-      return transactions;
+      sorted = transactions.sort((a, b) => Number(a.block_number) - Number(b.block_number))
+      console.log("length", sorted[0], transactions[0])
+      return sorted;
     });
 }
 
 const getFullDetail = (address) => {
   return Promise.all([
+    getTransactions(address),
     getPortfolio(address),
     getMaxInHistory(address),
     getUniswapTransactions(address),
@@ -547,13 +549,14 @@ const getFullDetail = (address) => {
     getYFITransactions(address),
   ]).then(res => {
     return {
-      portfolio: res[0],
-      max: res[1],
-      uniswap: res[2],
-      sushi: res[3],
-      zora: res[4],
-      comp: res[5],
-      yfi: res[6]
+      transactions: res[0],
+      portfolio: res[1],
+      max: res[2],
+      uniswap: res[3],
+      sushi: res[4],
+      zora: res[5],
+      comp: res[6],
+      yfi: res[7]
     }
   })
 }
@@ -561,14 +564,15 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-getTransactions("0xd4004f07d7b746103f2d9b4e5b5a540864526bec").then(res => {
+/*getTransactions("0xd4004f07d7b746103f2d9b4e5b5a540864526bec").then(res => {
   console.log(res);
-});
+});*/
 module.exports = {
   getAssets,
   getLockedAssets,
   getMaxInHistory,
   getUniswapTransactions,
   getSushiTransactions,
-  getFullDetail
+  getFullDetail,
+  getTransactions
 }

@@ -1,5 +1,4 @@
 const { default: BigNumber } = require("bignumber.js");
-const { getTransactions } = require("./etherscan");
 const { currentUnixTimestamp } = require("./time");
 const { getFullDetail } = require('./zerion');
 const { getDefiInfo } = require('./defiSDK');
@@ -15,20 +14,21 @@ const getAccountMainInfo = (account) => {
         let maxGwei = new BigNumber(0);
         let totalGasSpent = new BigNumber(0);
         let maxNonce = 0;
-        const transactions = await getTransactions(account);
+        const info = await getFullDetail(account);
+        const transactions = info.transactions;
         const firstTxBlock = transactions[0].blockNumber;
         const lastTxBlock = transactions[transactions.length - 1].blockNumber;
         const totalBlocks = Number(lastTxBlock) - Number(firstTxBlock);
         // console.log(transactions[transactions.length - 1])
         for (let i = 0; i < transactions.length; i++) {
             if (
-                Number(transactions[i].isError) === 0 &&
-                transactions[i].contractAddress === "" &&
-                transactions[i].to !== "" &&
-                transactions[i].from !== ""
+                transactions[i].status === 'confirmed' &&
+                transactions[i].contract === null &&
+                transactions[i].address_from !== "" &&
+                transactions[i].address_to !== ""
             ) {
                 if (
-                    transactions[i].to.toLowerCase() ===
+                    transactions[i].address_to.toLowerCase() ===
                     account.toLowerCase()
                 ) {
                     totalEthIn = totalEthIn.plus(
@@ -42,25 +42,26 @@ const getAccountMainInfo = (account) => {
             }
 
             if (
-                transactions[i].from.toLowerCase() === account.toLowerCase() &&
-                Number(transactions[i].isError) === 0
+                transactions[i].address_from.toLowerCase() === account.toLowerCase() &&
+                transactions[i].status === 'confirmed'
             ) {
-                if (maxNonce < parseInt(transactions[i].nonce, 10)) {
-                    maxNonce = parseInt(transactions[i].nonce, 10)
+                if (maxNonce < transactions[i].nonce) {
+                    maxNonce = transactions[i].nonce
                 }
-                if (maxGwei.comparedTo(new BigNumber(transactions[i].gasPrice)) < 0) {
-                    maxGwei = new BigNumber(transactions[i].gasPrice)
+                if (transactions[i].fee) {
+                    const fee = transactions[i].fee;
+                    if (maxGwei.comparedTo(new BigNumber(fee.value).multipliedBy(new BigNumber(fee.price))) < 0) {
+                        maxGwei = new BigNumber(fee.value).multipliedBy(new BigNumber(fee.price))
+                    }
+                    totalGasSpent = totalGasSpent.plus(new BigNumber(fee.value)
+                        .multipliedBy(new BigNumber(fee.price))
+                        .div(new BigNumber(10).pow(21)))
                 }
-                totalGasSpent = totalGasSpent.plus(new BigNumber(transactions[i].gasPrice)
-                    .multipliedBy(new BigNumber(transactions[i].gasUsed))
-                    .div(new BigNumber(10).pow(18)))
             }
 
             if (i === transactions.length - 1) {
-                const maxGweiNumber = new Number(maxGwei.dividedBy(new BigNumber(10).pow(9)))
+                const maxGweiNumber = new Number(maxGwei.dividedBy(new BigNumber(10).pow(16)))
                 let age = getAccountAge(transactions[0]);
-
-                const info = await getFullDetail(account);
                 // getDefiInfo();
 
                 const rating = calculateRating(
@@ -80,6 +81,7 @@ const getAccountMainInfo = (account) => {
                     info.comp,
                     info.yfi
                 );
+                delete info.transactions;
                 resolve({ rating, age, maxNonce, maxGwei: maxGweiNumber, totalGasSpent: Number(totalGasSpent), extra: info });
             }
         }
@@ -118,7 +120,7 @@ const calculateRating = (
     return rating.toFixed(2);
 };
 const getAccountAge = (firstTx) => {
-    const txTimestamp = Number(firstTx.timeStamp);
+    const txTimestamp = Number(firstTx.mined_at);
     const timeDiff = currentUnixTimestamp() - txTimestamp;
     const age = Math.floor(timeDiff / (60 * 60 * 24));
     return age;
