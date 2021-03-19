@@ -508,6 +508,34 @@ const getPortfolio = (address) => {
     });
 }
 
+const getTransactions = (address) => {
+	//console.log("start uniswap", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000
+      },
+    }).then(data => {
+      const { transactions } = data.payload;
+      console.log("length", transactions.length)
+      return transactions;
+    });
+}
+
 const getFullDetail = (address) => {
   return Promise.all([
     getPortfolio(address),
@@ -533,9 +561,9 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getYFITransactions("0x81759b0466EEB57f55DC2663d045b1BE9c0AB182").then(res => {
+getTransactions("0xd4004f07d7b746103f2d9b4e5b5a540864526bec").then(res => {
   console.log(res);
-});*/
+});
 module.exports = {
   getAssets,
   getLockedAssets,
