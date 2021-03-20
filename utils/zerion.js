@@ -139,6 +139,61 @@ const getMaxInHistory = (address) => {
     });
 }
 
+const getPortfolio = (address) => {
+	//console.log("start uniswap", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['portfolio'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      portfolio_fields: 'all'
+      },
+    }).then(data => {
+      const { portfolio } = data.payload;
+      return portfolio;
+    });
+}
+
+const getTransactions = (address) => {
+	//console.log("getTransactions", address);
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+        address: address,
+        currency: 'usd',
+        transactions_limit: 10000
+      },
+    }).then(data => {
+      const { transactions } = data.payload;
+      sorted = transactions.sort((a, b) => Number(a.block_number) - Number(b.block_number))
+      return sorted;
+    });
+}
+
 const getUniswapTransactions = (address) => {
 	//console.log("getUniswapTransactions", address);
   //uniswap-v2 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
@@ -617,35 +672,9 @@ const getWBTCTransactions = (address) => {
     });
 }
 
-const getPortfolio = (address) => {
-	//console.log("start uniswap", address);
-  const assetsSocket = {
-      namespace: 'address',
-      socket: io(`${BASE_URL}address`, {
-        transports: ['websocket'],
-        timeout: 60000,
-        query: {
-          api_token:
-            zeronKey ||
-            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
-        },
-      }),
-  };
-  return get(assetsSocket, {
-      scope: ['portfolio'],
-      payload: {
-      address:address,
-      currency: 'usd',
-      portfolio_fields: 'all'
-      },
-    }).then(data => {
-      const { portfolio } = data.payload;
-      return portfolio;
-    });
-}
-
-const getTransactions = (address) => {
-	//console.log("getTransactions", address);
+const getCoverTransactions = (address) => {
+	//console.log("getCoverTransactions", address);
+  //Cover 0x4688a8b1F292FDaB17E9a90c8Bc379dC1DBd8713 Cover Protocol: COVER Token
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -661,14 +690,53 @@ const getTransactions = (address) => {
   return get(assetsSocket, {
       scope: ['transactions'],
       payload: {
-        address: address,
-        currency: 'usd',
-        transactions_limit: 10000
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000,
+      transactions_offset: 0,
+      transactions_search_query: '0x4688a8b1F292FDaB17E9a90c8Bc379dC1DBd8713'
       },
-    }).then(data => {
-      const { transactions } = data.payload;
-      sorted = transactions.sort((a, b) => Number(a.block_number) - Number(b.block_number))
-      return sorted;
+    }).then(response => {
+      const {payload} = response;
+      const {transactions} = payload;
+      let sent, received, trading, exchangefee;
+      sent = received = trading = 0;
+      exchangefee = {
+        ETH: 0,
+        USD: 0
+      }
+      transactions.forEach(trx => {
+        const {type, changes, fee, status} = trx;
+        if (status != 'confirmed')
+          return;
+        changes.forEach(ast => {
+          const {asset: {symbol, decimals}, value} = ast;
+          if (symbol == 'COVER') {
+            const zora_value = value / Math.pow(10, decimals);
+            switch(type) {
+              case 'trade':
+                trading += zora_value;
+                break;
+              case 'receive':
+                received += zora_value;
+                break;
+              case 'send':
+                sent += zora_value;
+                break;
+              default:
+                break;
+            }
+            if (fee) {
+              fee_value = fee.value / Math.pow(10, 18);
+              exchangefee.ETH += fee_value; //Eth decimal 18
+              exchangefee.USD += fee_value * fee.price;
+            }
+          }
+        })
+      })
+      return {
+        sent, received, trading, exchangefee
+      }
     });
 }
 
@@ -684,6 +752,7 @@ const getFullDetail = (address) => {
     getYFITransactions(address),
     getPickleTransactions(address),
     getWBTCTransactions(address),
+    getCoverTransactions(address),
   ]).then(res => {
     return {
       transactions: res[0],
@@ -695,7 +764,8 @@ const getFullDetail = (address) => {
       comp: res[6],
       yfi: res[7],
       pickle: res[8],
-      wbtc: res[9]
+      wbtc: res[9],
+      cover: res[10],
     }
   })
 }
@@ -703,7 +773,7 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getWBTCTransactions("0x3b15cec2d922ab0ef74688bcc1056461049f89cb").then(res => {
+/*getCoverTransactions("0xfe4c0198d88abdbb6e246944ed0465a0e2baf7df").then(res => {
   console.log(res);
 });*/
 module.exports = {

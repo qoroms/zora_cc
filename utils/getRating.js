@@ -170,9 +170,17 @@ const getWBTCRating = (wbtcTotal) => {
     )
 }
 
+const getCoverRating = (coverTotal) => {
+    return getNumberByRange(
+        coverTotal,
+        [0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 1, 2, 3, 5, 10],
+        [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 65]
+    )
+}
+
 
 module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
      getZoraRating, getCompoundRating, getYFIRating, getPickleRating,
-     getWBTCRating}
+     getWBTCRating, getCoverRating}

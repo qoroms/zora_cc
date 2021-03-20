@@ -6,7 +6,7 @@ const { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
      getZoraRating, getCompoundRating, getYFIRating,
-     getPickleRating, getWBTCRating } = require('./getRating');
+     getPickleRating, getWBTCRating, getCoverRating } = require('./getRating');
 
 const getAccountMainInfo = (account) => {
     return new Promise(async (resolve) => {
@@ -82,7 +82,8 @@ const getAccountMainInfo = (account) => {
                     info.comp,
                     info.yfi,
                     info.pickle,
-                    info.wbtc
+                    info.wbtc,
+                    info.cover
                 );
                 delete info.transactions;
                 resolve({ rating, age, maxNonce, maxGwei: maxGweiNumber, totalGasSpent: Number(totalGasSpent), extra: info });
@@ -108,7 +109,8 @@ const calculateRating = (
     comp,
     yfi,
     pickle,
-    wbtc) => {
+    wbtc,
+    cover) => {
     let rating = getTotalBlocksNumber(totalBlocks); // 70
     rating += getTotalEth(totalEthIn, totalEthOut); // 30
     rating += getGweiRating(maxGwei); // 50
@@ -117,13 +119,14 @@ const calculateRating = (
     rating += getTotalGasSpent(totalGasSpent); // 50
     rating += getEtherRating(totalValue, maxValue); // 50
     rating += getBscRating(bscValue); // 20
-    rating += getUniswapRating(uniswap.sent + uniswap.receive + uniswap.trading); //30
-    rating += getSushiRating(sushi.sent + sushi.receive + sushi.trading) // 30
-    rating += getZoraRating(zora.sent + zora.receive + zora.trading) // 50
-    rating += getCompoundRating(comp.sent + comp.receive + comp.trading) // 15
-    rating += getYFIRating(yfi.sent + yfi.receive + yfi.trading) // 60
-    rating += getPickleRating(pickle.sent + pickle.receive + pickle.trading) // 50
-    rating + getWBTCRating(wbtc.sent + wbtc.receive + wbtc.trading) // 20
+    rating += getUniswapRating(uniswap.sent + uniswap.received + uniswap.trading); //30
+    rating += getSushiRating(sushi.sent + sushi.received + sushi.trading) // 30
+    rating += getZoraRating(zora.sent + zora.received + zora.trading) // 50
+    rating += getCompoundRating(comp.sent + comp.received + comp.trading) // 15
+    rating += getYFIRating(yfi.sent + yfi.received + yfi.trading) // 60
+    rating += getPickleRating(pickle.sent + pickle.received + pickle.trading) // 50
+    rating += getWBTCRating(wbtc.sent + wbtc.received + wbtc.trading) // 20
+    rating += getCoverRating(cover.sent + cover.received + cover.trading) // 65
     return rating.toFixed(2);
 };
 const getAccountAge = (firstTx) => {
