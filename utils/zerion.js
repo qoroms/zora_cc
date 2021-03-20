@@ -549,6 +549,74 @@ const getPickleTransactions = (address) => {
     });
 }
 
+const getWBTCTransactions = (address) => {
+	//console.log("getWBTCTransactions", address);
+  //YFI 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599 Wrapped BTC: WBTC Token
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000,
+      transactions_offset: 0,
+      transactions_search_query: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+      },
+    }).then(response => {
+      const {payload} = response;
+      const {transactions} = payload;
+      let sent, received, trading, exchangefee;
+      sent = received = trading = 0;
+      exchangefee = {
+        ETH: 0,
+        USD: 0
+      }
+      transactions.forEach(trx => {
+        const {type, changes, fee, status} = trx;
+        if (status != 'confirmed')
+          return;
+        changes.forEach(ast => {
+          const {asset: {symbol, decimals}, value} = ast;
+          if (symbol == 'WBTC') {
+            const zora_value = value / Math.pow(10, decimals);
+            switch(type) {
+              case 'trade':
+                trading += zora_value;
+                break;
+              case 'receive':
+                received += zora_value;
+                break;
+              case 'send':
+                sent += zora_value;
+                break;
+              default:
+                break;
+            }
+            if (fee) {
+              fee_value = fee.value / Math.pow(10, 18);
+              exchangefee.ETH += fee_value; //Eth decimal 18
+              exchangefee.USD += fee_value * fee.price;
+            }
+          }
+        })
+      })
+      return {
+        sent, received, trading, exchangefee
+      }
+    });
+}
+
 const getPortfolio = (address) => {
 	//console.log("start uniswap", address);
   const assetsSocket = {
@@ -614,7 +682,8 @@ const getFullDetail = (address) => {
     getZoraTransactions(address),
     getCompoundTransactions(address),
     getYFITransactions(address),
-    getPickleTransactions(address)
+    getPickleTransactions(address),
+    getWBTCTransactions(address),
   ]).then(res => {
     return {
       transactions: res[0],
@@ -625,7 +694,8 @@ const getFullDetail = (address) => {
       zora: res[5],
       comp: res[6],
       yfi: res[7],
-      pickle: res[8]
+      pickle: res[8],
+      wbtc: res[9]
     }
   })
 }
@@ -633,7 +703,7 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getPickleTransactions("0xbd69b2e35262c98e3d2bde8a32ab50ecf83856d8").then(res => {
+/*getWBTCTransactions("0x3b15cec2d922ab0ef74688bcc1056461049f89cb").then(res => {
   console.log(res);
 });*/
 module.exports = {

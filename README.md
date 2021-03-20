@@ -31,3 +31,5 @@ Compound rating // 15
 YFI rating // 60
 
 Pickle rating // 50
+
+WBTC rating // 20

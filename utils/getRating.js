@@ -162,8 +162,17 @@ const getPickleRating = (pickleTotal) => {
     )
 }
 
+const getWBTCRating = (wbtcTotal) => {
+    return getNumberByRange(
+        wbtcTotal,
+        [0, 0.0001, 0.001, 0.002, 0.005, 0.01, 0.02, 1],
+        [0, 1, 2, 3, 4, 5, 10, 15, 20]
+    )
+}
+
 
 module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
-     getZoraRating, getCompoundRating, getYFIRating, getPickleRating}
+     getZoraRating, getCompoundRating, getYFIRating, getPickleRating,
+     getWBTCRating}
