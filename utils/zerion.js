@@ -185,6 +185,7 @@ const getTransactions = (address) => {
       payload: {
         address: address,
         currency: 'usd',
+        transactions_offset: 0,
         transactions_limit: 10000
       },
     }).then(data => {
@@ -333,7 +334,7 @@ const getSushiTransactions = (address) => {
 
 const getZoraTransactions = (address) => {
 	//console.log("getZoraTransactions", address);
-  //sushi 0xd8e3fb3b08eba982f2754988d70d57edc0055ae6
+  //zora 0xd8e3fb3b08eba982f2754988d70d57edc0055ae6
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -401,7 +402,7 @@ const getZoraTransactions = (address) => {
 
 const getCompoundTransactions = (address) => {
 	//console.log("getZoraTransactions", address);
-  //sushi 0xc00e94cb662c3520282e6f5717214004a7f26888 compound COMP token
+  //compound 0xc00e94cb662c3520282e6f5717214004a7f26888 compound COMP token
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -439,16 +440,16 @@ const getCompoundTransactions = (address) => {
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
           if (symbol == 'COMP') {
-            const zora_value = value / Math.pow(10, decimals);
+            const token_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
-                trading += zora_value;
+                trading += token_value;
                 break;
               case 'receive':
-                received += zora_value;
+                received += token_value;
                 break;
               case 'send':
-                sent += zora_value;
+                sent += token_value;
                 break;
               default:
                 break;
@@ -508,16 +509,16 @@ const getYFITransactions = (address) => {
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
           if (symbol == 'YFI') {
-            const zora_value = value / Math.pow(10, decimals);
+            const token_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
-                trading += zora_value;
+                trading += token_value;
                 break;
               case 'receive':
-                received += zora_value;
+                received += token_value;
                 break;
               case 'send':
-                sent += zora_value;
+                sent += token_value;
                 break;
               default:
                 break;
@@ -538,7 +539,7 @@ const getYFITransactions = (address) => {
 
 const getPickleTransactions = (address) => {
 	//console.log("getPickleTransactions", address);
-  //YFI 0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5 PICKLE.Finance: PICKLE Token
+  //Pickle 0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5 PICKLE.Finance: PICKLE Token
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -576,16 +577,16 @@ const getPickleTransactions = (address) => {
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
           if (symbol == 'PICKLE') {
-            const zora_value = value / Math.pow(10, decimals);
+            const token_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
-                trading += zora_value;
+                trading += token_value;
                 break;
               case 'receive':
-                received += zora_value;
+                received += token_value;
                 break;
               case 'send':
-                sent += zora_value;
+                sent += token_value;
                 break;
               default:
                 break;
@@ -606,7 +607,7 @@ const getPickleTransactions = (address) => {
 
 const getWBTCTransactions = (address) => {
 	//console.log("getWBTCTransactions", address);
-  //YFI 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599 Wrapped BTC: WBTC Token
+  //WBTC 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599 Wrapped BTC: WBTC Token
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -644,16 +645,16 @@ const getWBTCTransactions = (address) => {
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
           if (symbol == 'WBTC') {
-            const zora_value = value / Math.pow(10, decimals);
+            const token_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
-                trading += zora_value;
+                trading += token_value;
                 break;
               case 'receive':
-                received += zora_value;
+                received += token_value;
                 break;
               case 'send':
-                sent += zora_value;
+                sent += token_value;
                 break;
               default:
                 break;
@@ -712,16 +713,16 @@ const getCoverTransactions = (address) => {
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
           if (symbol == 'COVER') {
-            const zora_value = value / Math.pow(10, decimals);
+            const token_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
-                trading += zora_value;
+                trading += token_value;
                 break;
               case 'receive':
-                received += zora_value;
+                received += token_value;
                 break;
               case 'send':
-                sent += zora_value;
+                sent += token_value;
                 break;
               default:
                 break;
@@ -773,9 +774,9 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getCoverTransactions("0xfe4c0198d88abdbb6e246944ed0465a0e2baf7df").then(res => {
+getFullDetail("0xd4004f07d7b746103f2d9b4e5b5a540864526bec").then(res => {
   console.log(res);
-});*/
+});
 module.exports = {
   getAssets,
   getLockedAssets,
