@@ -35,3 +35,5 @@ Pickle rating // 50
 WBTC rating // 20
 
 Cover rating // 65
+
+Aave rating // 50

@@ -178,9 +178,17 @@ const getCoverRating = (coverTotal) => {
     )
 }
 
+const getAaveRating = (aaveTotal) => {
+    return getNumberByRange(
+        aaveTotal,
+        [0, 1, 50, 100, 500, 1000, 1500, 2000, 3000, 5000],
+        [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    )
+}
+
 
 module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
      getZoraRating, getCompoundRating, getYFIRating, getPickleRating,
-     getWBTCRating, getCoverRating}
+     getWBTCRating, getCoverRating, getAaveRating}

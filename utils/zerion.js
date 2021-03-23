@@ -741,6 +741,73 @@ const getCoverTransactions = (address) => {
     });
 }
 
+const getAaveTransactions = (address) => {
+	//console.log("getAaveTransactions", address);
+  //Cover 0x80fB784B7eD66730e8b1DBd9820aFD29931aab03 Aave: LEND Token
+  const assetsSocket = {
+      namespace: 'address',
+      socket: io(`${BASE_URL}address`, {
+        transports: ['websocket'],
+        timeout: 60000,
+        query: {
+          api_token:
+            zeronKey ||
+            'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
+        },
+      }),
+  };
+  return get(assetsSocket, {
+      scope: ['transactions'],
+      payload: {
+      address:address,
+      currency: 'usd',
+      transactions_limit: 10000,
+      transactions_offset: 0,
+      transactions_search_query: '0x80fB784B7eD66730e8b1DBd9820aFD29931aab03'
+      },
+    }).then(response => {
+      const {payload} = response;
+      const {transactions} = payload;
+      let sent, received, trading, exchangefee;
+      sent = received = trading = 0;
+      exchangefee = {
+        ETH: 0,
+        USD: 0
+      }
+      transactions.forEach(trx => {
+        const {type, changes, fee, status} = trx;
+        if (status != 'confirmed')
+          return;
+        changes.forEach(ast => {
+          const {asset: {symbol, decimals}, value} = ast;
+          if (symbol == 'LEND') {
+            const token_value = value / Math.pow(10, decimals);
+            switch(type) {
+              case 'trade':
+                trading += token_value;
+                break;
+              case 'receive':
+                received += token_value;
+                break;
+              case 'send':
+                sent += token_value;
+                break;
+              default:
+                break;
+            }
+            if (fee) {
+              fee_value = fee.value / Math.pow(10, 18);
+              exchangefee.ETH += fee_value; //Eth decimal 18
+              exchangefee.USD += fee_value * fee.price;
+            }
+          }
+        })
+      })
+      return {
+        sent, received, trading, exchangefee
+      }
+    });
+}
 const getFullDetail = (address) => {
   return Promise.all([
     getTransactions(address),
@@ -754,6 +821,7 @@ const getFullDetail = (address) => {
     getPickleTransactions(address),
     getWBTCTransactions(address),
     getCoverTransactions(address),
+    getAaveTransactions(address)
   ]).then(res => {
     return {
       transactions: res[0],
@@ -767,6 +835,7 @@ const getFullDetail = (address) => {
       pickle: res[8],
       wbtc: res[9],
       cover: res[10],
+      aave: res[11]
     }
   })
 }
@@ -774,9 +843,9 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-getFullDetail("0xd4004f07d7b746103f2d9b4e5b5a540864526bec").then(res => {
+/*getFullDetail("0xf146E516258D277f493366Bd216D9B3c05e0c61C").then(res => {
   console.log(res);
-});
+});*/
 module.exports = {
   getAssets,
   getLockedAssets,

@@ -6,7 +6,7 @@ const { getTotalBlocksNumber, getTotalEth, getGweiRating,
      getAgeRating, getNonceRating, getTotalGasSpent,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
      getZoraRating, getCompoundRating, getYFIRating,
-     getPickleRating, getWBTCRating, getCoverRating } = require('./getRating');
+     getPickleRating, getWBTCRating, getCoverRating, getAaveRating } = require('./getRating');
 
 const getAccountMainInfo = (account) => {
     return new Promise(async (resolve) => {
@@ -83,7 +83,8 @@ const getAccountMainInfo = (account) => {
                     info.yfi,
                     info.pickle,
                     info.wbtc,
-                    info.cover
+                    info.cover,
+                    info.aave
                 );
                 delete info.transactions;
                 resolve({ rating, age, maxNonce, maxGwei: maxGweiNumber, totalGasSpent: Number(totalGasSpent), extra: info });
@@ -110,7 +111,8 @@ const calculateRating = (
     yfi,
     pickle,
     wbtc,
-    cover) => {
+    cover,
+    aave) => {
     let rating = getTotalBlocksNumber(totalBlocks); // 70
     rating += getTotalEth(totalEthIn, totalEthOut); // 30
     rating += getGweiRating(maxGwei); // 50
@@ -127,6 +129,7 @@ const calculateRating = (
     rating += getPickleRating(pickle.sent + pickle.received + pickle.trading) // 50
     rating += getWBTCRating(wbtc.sent + wbtc.received + wbtc.trading) // 20
     rating += getCoverRating(cover.sent + cover.received + cover.trading) // 65
+    rating += getAaveRating(aave.sent + aave.received + aave.trading) // 50
     return rating.toFixed(2);
 };
 const getAccountAge = (firstTx) => {
