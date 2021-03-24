@@ -17,6 +17,9 @@ const getAccountMainInfo = (account) => {
         let maxNonce = 0;
         const info = await getFullDetail(account);
         const transactions = info.transactions;
+        if (transactions.length == 0) {
+            return resolve({ rating : 0, age: 0, maxNonce: 0, maxGwei: 0, totalGasSpent: 0, extra: null });
+        }
         const firstTxBlock = transactions[0].blockNumber;
         const lastTxBlock = transactions[transactions.length - 1].blockNumber;
         const totalBlocks = Number(lastTxBlock) - Number(firstTxBlock);

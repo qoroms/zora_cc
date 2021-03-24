@@ -131,6 +131,8 @@ const getMaxInHistory = (address) => {
       const {payload} = response;
       const charts = payload.charts.others;
       let max = 0;
+      if (!charts)
+        return 0;
       charts.forEach(item => {
         if (item[1] > max)
           max = item[1];
