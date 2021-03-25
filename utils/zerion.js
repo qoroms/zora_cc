@@ -38,8 +38,8 @@ function get(socketNamespace, requestBody) {
   });
 }
 
-const getAssets = (address) => {
-	console.log("getAssets", address);
+const getTokenBalance = (tokenType, address) => {
+	//console.log("getTokenBalance", address);
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -65,12 +65,13 @@ const getAssets = (address) => {
       let total = 0;
       for(key in assets) {
         const item = assets[key];
-        const {asset: { name, price, decimals }, quantity} = item;
+        const {asset: { name, price, symbol,  decimals }, quantity} = item;
+        if (tokenType != symbol)
+          continue;
         const q = quantity / Math.pow(10, decimals);
-        if (price)
-          total += price.value * q;
+        return q;
       }
-      return total;
+      return 0;
     });
 }
 
@@ -824,7 +825,8 @@ const getFullDetail = (address) => {
     getPickleTransactions(address),
     getWBTCTransactions(address),
     getCoverTransactions(address),
-    getAaveTransactions(address)
+    getAaveTransactions(address),
+    getTokenBalance('ETH', address),
   ]).then(res => {
     return {
       transactions: res[0],
@@ -838,7 +840,8 @@ const getFullDetail = (address) => {
       pickle: res[8],
       wbtc: res[9],
       cover: res[10],
-      aave: res[11]
+      aave: res[11],
+      eth: res[12]
     }
   })
 }
@@ -846,11 +849,10 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-// getZoraTransactions("0x7A6d4a30f800c63965c68590e99C5b661948Aaa3").then(res => {
-//   console.log(res);
-// });
+// getFullDetail("0x7a6d4a30f800c63965c68590e99c5b661948aaa3").then(res => {
+//    console.log(res);
+//  });
 module.exports = {
-  getAssets,
   getLockedAssets,
   getMaxInHistory,
   getUniswapTransactions,

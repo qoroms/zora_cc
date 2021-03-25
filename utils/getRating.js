@@ -96,14 +96,26 @@ const getTotalGasSpent = (gasSpent) => {
 		[5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 	);
 }
-
-const getEtherRating = (total, max) => {
+const getAssetRating = (total, max) => {
     const v = total * 0.6 + max * 0.4;
     return getNumberByRange(
         v,
         [0, 0.00001, 1, 10, 50, 100, 500, 1000, 2000, 5000, 10000, 15000, 20000],
         [0, 0, 1, 2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
     )
+}
+
+const getEtherRating = (eth) => {
+    const limit = 5;
+    const highvalue = 30;
+    if (eth > limit)
+        return highvalue;
+    return Math.floor(highvalue * eth / limit);
+    /*return getNumberByRange(
+        eth,
+        [0, 0.00001, 0.1, 0.2, 0.5, 1, 2, 3, 4, 5],
+        [0, 0, 1, 2, 5, 8, 12, 15, 20, 25, 30]
+    )*/
 }
 
 const getBscRating = (bsc) => {
@@ -188,7 +200,7 @@ const getAaveRating = (aaveTotal) => {
 
 
 module.exports = { getTotalBlocksNumber, getTotalEth, getGweiRating,
-     getAgeRating, getNonceRating, getTotalGasSpent,
+     getAgeRating, getNonceRating, getTotalGasSpent, getAssetRating,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
      getZoraRating, getCompoundRating, getYFIRating, getPickleRating,
      getWBTCRating, getCoverRating, getAaveRating}
