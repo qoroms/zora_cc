@@ -1,6 +1,6 @@
 const io = require('socket.io-client');
 const { default: BigNumber } = require("bignumber.js");
-const { zeronKey } = require("./config");
+const { zerionKey } = require("./config");
 const FALLBACK_URL = 'wss://api-v4.zerion.io/';
 const BASE_URL = FALLBACK_URL;
 
@@ -38,8 +38,8 @@ function get(socketNamespace, requestBody) {
   });
 }
 
-const getAssets = (address) => {
-	console.log("getAssets", address);
+const getTokenBalance = (tokenType, address) => {
+	//console.log("getTokenBalance", address);
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -47,7 +47,7 @@ const getAssets = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -65,12 +65,13 @@ const getAssets = (address) => {
       let total = 0;
       for(key in assets) {
         const item = assets[key];
-        const {asset: { name, price, decimals }, quantity} = item;
+        const {asset: { name, price, symbol,  decimals }, quantity} = item;
+        if (tokenType != symbol)
+          continue;
         const q = quantity / Math.pow(10, decimals);
-        if (price)
-          total += price.value * q;
+        return q;
       }
-      return total;
+      return 0;
     });
 }
 
@@ -83,7 +84,7 @@ const getLockedAssets = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -115,7 +116,7 @@ const getMaxInHistory = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -150,7 +151,7 @@ const getPortfolio = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -177,7 +178,7 @@ const getTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -207,7 +208,7 @@ const getUniswapTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -275,7 +276,7 @@ const getSushiTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -344,7 +345,7 @@ const getZoraTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -412,7 +413,7 @@ const getCompoundTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -480,7 +481,7 @@ const getYFITransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -549,7 +550,7 @@ const getPickleTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -617,7 +618,7 @@ const getWBTCTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -685,7 +686,7 @@ const getCoverTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -745,7 +746,8 @@ const getCoverTransactions = (address) => {
 
 const getAaveTransactions = (address) => {
 	//console.log("getAaveTransactions", address);
-  //Cover 0x80fB784B7eD66730e8b1DBd9820aFD29931aab03 Aave: LEND Token
+  //0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9
+  //Aave 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9 Aave: Lending Pool V2
   const assetsSocket = {
       namespace: 'address',
       socket: io(`${BASE_URL}address`, {
@@ -753,7 +755,7 @@ const getAaveTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -765,7 +767,7 @@ const getAaveTransactions = (address) => {
       currency: 'usd',
       transactions_limit: 10000,
       transactions_offset: 0,
-      transactions_search_query: '0x80fB784B7eD66730e8b1DBd9820aFD29931aab03'
+      transactions_search_query: '0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9'
       },
     }).then(response => {
       const {payload} = response;
@@ -782,7 +784,7 @@ const getAaveTransactions = (address) => {
           return;
         changes.forEach(ast => {
           const {asset: {symbol, decimals}, value} = ast;
-          if (symbol == 'LEND') {
+          if (symbol == 'aSNX') {
             const token_value = value / Math.pow(10, decimals);
             switch(type) {
               case 'trade':
@@ -823,7 +825,8 @@ const getFullDetail = (address) => {
     getPickleTransactions(address),
     getWBTCTransactions(address),
     getCoverTransactions(address),
-    getAaveTransactions(address)
+    getAaveTransactions(address),
+    getTokenBalance('ETH', address),
   ]).then(res => {
     return {
       transactions: res[0],
@@ -837,7 +840,8 @@ const getFullDetail = (address) => {
       pickle: res[8],
       wbtc: res[9],
       cover: res[10],
-      aave: res[11]
+      aave: res[11],
+      eth: res[12]
     }
   })
 }
@@ -845,11 +849,10 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-/*getFullDetail("0xf146E516258D277f493366Bd216D9B3c05e0c61C").then(res => {
-  console.log(res);
-});*/
+getTransactions("0x7a6d4a30f800c63965c68590e99c5b661948aaa3").then(res => {
+   console.log(res);
+ });
 module.exports = {
-  getAssets,
   getLockedAssets,
   getMaxInHistory,
   getUniswapTransactions,

@@ -3,7 +3,7 @@ const { currentUnixTimestamp } = require("./time");
 const { getFullDetail } = require('./zerion');
 const { getDefiInfo } = require('./defiSDK');
 const { getTotalBlocksNumber, getTotalEth, getGweiRating,
-     getAgeRating, getNonceRating, getTotalGasSpent,
+     getAgeRating, getNonceRating, getTotalGasSpent, getAssetRating,
      getEtherRating, getBscRating, getUniswapRating, getSushiRating,
      getZoraRating, getCompoundRating, getYFIRating,
      getPickleRating, getWBTCRating, getCoverRating, getAaveRating } = require('./getRating');
@@ -77,8 +77,9 @@ const getAccountMainInfo = (account) => {
                     maxNonce,
                     Number(totalGasSpent),
                     info.portfolio.total_value,
-                    info.portfolio.bsc_assets_value,
                     info.max,
+                    info.portfolio.bsc_assets_value,
+                    info.eth,                    
                     info.uniswap,
                     info.sushi,
                     info.zora,
@@ -107,6 +108,7 @@ const calculateRating = (
     totalValue,
     maxValue,
     bscValue,
+    ethValue,
     uniswap,
     sushi,
     zora,
@@ -122,11 +124,12 @@ const calculateRating = (
     rating += getAgeRating(age); // 40
     rating += getNonceRating(maxNonce); // 40
     rating += getTotalGasSpent(totalGasSpent); // 50
-    rating += getEtherRating(totalValue, maxValue); // 50
+    rating += getAssetRating(totalValue, maxValue); // 50
+    rating += getEtherRating(ethValue); // 30
     rating += getBscRating(bscValue); // 20
     rating += getUniswapRating(uniswap.sent + uniswap.received + uniswap.trading); //30
     rating += getSushiRating(sushi.sent + sushi.received + sushi.trading) // 30
-    rating += getZoraRating(zora.sent + zora.received + zora.trading) // 50
+    rating += getZoraRating(zora.sent + zora.received + zora.trading) // 100
     rating += getCompoundRating(comp.sent + comp.received + comp.trading) // 15
     rating += getYFIRating(yfi.sent + yfi.received + yfi.trading) // 60
     rating += getPickleRating(pickle.sent + pickle.received + pickle.trading) // 50
