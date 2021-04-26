@@ -1,6 +1,6 @@
 const io = require('socket.io-client');
 const { default: BigNumber } = require("bignumber.js");
-const { zeronKey } = require("./config");
+const { zerionKey } = require("./config");
 const FALLBACK_URL = 'wss://api-v4.zerion.io/';
 const BASE_URL = FALLBACK_URL;
 
@@ -47,7 +47,7 @@ const getTokenBalance = (tokenType, address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -84,7 +84,7 @@ const getLockedAssets = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -116,7 +116,7 @@ const getMaxInHistory = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -151,7 +151,7 @@ const getPortfolio = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -178,7 +178,7 @@ const getTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -208,7 +208,7 @@ const getUniswapTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -276,7 +276,7 @@ const getSushiTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -345,7 +345,7 @@ const getZoraTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -413,7 +413,7 @@ const getCompoundTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -481,7 +481,7 @@ const getYFITransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -550,7 +550,7 @@ const getPickleTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -618,7 +618,7 @@ const getWBTCTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -686,7 +686,7 @@ const getCoverTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -755,7 +755,7 @@ const getAaveTransactions = (address) => {
         timeout: 60000,
         query: {
           api_token:
-            zeronKey ||
+            zerionKey ||
             'Demo.ukEVQp6L5vfgxcz4sBke7XvS873GMYHy',
         },
       }),
@@ -849,9 +849,9 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-// getFullDetail("0x7a6d4a30f800c63965c68590e99c5b661948aaa3").then(res => {
-//    console.log(res);
-//  });
+getTransactions("0x7a6d4a30f800c63965c68590e99c5b661948aaa3").then(res => {
+   console.log(res);
+ });
 module.exports = {
   getLockedAssets,
   getMaxInHistory,
