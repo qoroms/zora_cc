@@ -20,9 +20,7 @@ function get(socketNamespace, requestBody) {
   return new Promise(resolve => {
     const { socket, namespace } = socketNamespace;
     function handleReceive(data) {
-      unsubscribe();
-      resolve(data);
-      if (verify(requestBody, data)) 
+      //if (verify(requestBody, data)) 
       {
         unsubscribe();
         resolve(data);
@@ -32,6 +30,7 @@ function get(socketNamespace, requestBody) {
     function unsubscribe() {
       socket.off(`received ${namespace} ${model}`, handleReceive);
       socket.emit('unsubscribe', requestBody);
+      socket.disconnect();
     }
     socket.emit('get', requestBody);
     socket.on(`received ${namespace} ${model}`, handleReceive);
@@ -849,9 +848,9 @@ const getFullDetail = (address) => {
 //0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4
 //0x638aF69053892CDD7Ad295fC2482d1a11Fe5a9B7
 //0xd4004f07d7b746103f2d9b4e5b5a540864526bec
-getTransactions("0x7a6d4a30f800c63965c68590e99c5b661948aaa3").then(res => {
+/*getFullDetail("0x7a6d4a30f800c63965c68590e99c5b661948aaa3").then(res => {
    console.log(res);
- });
+ });*/
 module.exports = {
   getLockedAssets,
   getMaxInHistory,
